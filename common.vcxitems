@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{45d41acc-2c3c-43d2-bc10-02aa73ffc7c7}</ItemsProjectGuid>
+    <ItemsRootNamespace>
+    </ItemsRootNamespace>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)backconnect.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)baseoverlay.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)binstorage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)comlibrary.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)console.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)crypt.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)debug.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)disasm.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)fs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)gdi.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)httpinject.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)httptools.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)malwaretools.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)math.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mem.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)mscab.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)peimage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)process.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)registry.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)sslsocket.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)str.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)sync.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)threadsgroup.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)time.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ucl.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)wahook.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)wininet.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)winsecurity.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)wsocket.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)xmlparser.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\backconnect.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\baseoverlay.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\binstorage.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\botstatus.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\comlibrary.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\console.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\crypt.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\debug.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\defines.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\disasm.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\fs.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\gdi.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\httpinject.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\httptools.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\wininet.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\malwaretools.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\math.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\mem.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\mscab.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\ntdll.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\peimage.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\process.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\registry.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\sslsocket.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\str.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\sync.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\threadsgroup.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\time.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\ucl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\wahook.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\winsecurity.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\wsocket.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\xmlparser.h" />
+  </ItemGroup>
+</Project>
