@@ -23,15 +23,10 @@ namespace BinStorage
     ITEMF_COMBINE_DELETE    = 0x00080000, //Режим удаления предыдушего элемента и текушего.
     ITEMF_COMBINE_MASK      = ITEMF_COMBINE_ADD | ITEMF_COMBINE_OVERWRITE | ITEMF_COMBINE_REPLACE | ITEMF_COMBINE_DELETE,
 
-	ITEMF_IS_ARGUMENT		= 0x00100000,
-	ITEMF_IS_MODULE_HASH    = 0x00200000,
-	ITEMF_IS_PROC_NAME_HASH = 0x00400000,
-
     //Данные флаги введены для уменьшения риска совпадения dwID.
     ITEMF_IS_OPTION         = 0x10000000, //Элемент являеся опцией.
     ITEMF_IS_SETTING        = 0x20000000, //Элемент является настройкой.
     ITEMF_IS_HTTP_INJECT    = 0x40000000, //Элемент являеся http-инжектом.
-	ITEMF_IS_COMMAND        = 0x80000000, //Command from server.
     ITEMF_IS_MASK           = ITEMF_IS_OPTION | ITEMF_IS_SETTING | ITEMF_IS_HTTP_INJECT
   };
 
@@ -248,6 +243,8 @@ namespace BinStorage
     Return            - размер хранилища, или 0 в случаи ошибки.
   */
   DWORD _pack(STORAGE **binStorage, DWORD flags, Crypt::RC4KEY *rc4Key);
+
+DWORD _pack2(STORAGE **binStorage, DWORD flags, Crypt::RC4KEY *rc4Key);
 
   /*
     Распаковка конфигурации.

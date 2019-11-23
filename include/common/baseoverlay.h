@@ -8,7 +8,7 @@ namespace BaseOverlay
 {  
   enum
   {
-    MAGIC_DWORD          = 0x45564144,
+    MAGIC_DWORD          = 0x45564144, //Магическео чилсо (DAVE).
     FULL_SIZE_OF_OVERLAY = 512,        //Полный максимальный размер оверлея после крипта.
   };
   

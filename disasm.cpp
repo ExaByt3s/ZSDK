@@ -1,6 +1,5 @@
-#include <windows.h>
-
-#include <common/disasm.h>
+#include "common/rl_kernel.h"
+#include "common/disasm.h"
 
 extern "C" int WINAPI LDE(void *, int);
 

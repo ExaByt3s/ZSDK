@@ -1,9 +1,11 @@
-#include <windows.h>
+
+
 #include <shlwapi.h>
 #include <shlobj.h>
 #include <sddl.h>
 #include <accCtrl.h>
 
+#include "common/mem.h"
 #include "common/str.h"
 #include "common/fs.h"
 #include "common/sync.h"
@@ -47,7 +49,7 @@ typedef struct
   DWORD dwTickCount;  //GetTickCount()
 
   char strFunctionName[50]; //UTF-8. Имя функции, думаю 50 байт будет достаточно.
-  char strSourceFile[80];   //UTF-8. Имя исходного файла.
+  char strSourceFile[50];   //UTF-8. Имя исходного файла.
   DWORD dwLineNumber;       //Номер строки в исходном файле.
 }DEBUGDATA;
 #pragma pack(pop)

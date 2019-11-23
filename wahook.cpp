@@ -1,16 +1,12 @@
-#include <windows.h>
+#include "common/rl_kernel.h"
 
 #include "common/wahook.h"
+#include "common/mem.h"
 #include "common/disasm.h"
-#include <common/mem.h>
+
 
 #if defined _WIN64
-  #define WRITE_JMP(mem, thisAddress, to) {*((LPWORD)(mem)) = OPCODE_JMP; *((DWORD *)(((LPBYTE)mem) + 2)) = 0x00000000; *((DWORD64 *)(((LPBYTE)(mem)) + OPCODE_JMP_SIZE)) = (DWORD64)((DWORD_PTR)(to));}
-  #define OPCODE_JMP      0x25FF
-  #define OPCODE_JMP_SIZE 6 
-  #define JMP_ADDR_SIZE   (sizeof(DWORD64) + OPCODE_JMP_SIZE)
-  #define INJECT_SIZE     JMP_ADDR_SIZE
-  #define OPCODE_MAX_SIZE 16  
+  //FIXME
 #else
   #define WRITE_JMP(mem, thisAddress, to) {*((LPBYTE)(mem)) = OPCODE_JMP; *((DWORD *)(((LPBYTE)(mem)) + OPCODE_JMP_SIZE)) = (DWORD)((DWORD_PTR)(to) - (DWORD_PTR)(thisAddress) - INJECT_SIZE);}
   #define OPCODE_JMP      0xE9
@@ -93,7 +89,7 @@ DWORD WaHook::_hook(HANDLE process, void *functionForHook, void *hookerFunction,
         
         goto END; 
       }
-#     if !defined _WIN64      
+      
       //Отностиельные call и jmp.
       if((currentOpcode[0] == 0xE9 || currentOpcode[0] == 0xE8) && currentOpcodeLen == 1 + sizeof(DWORD)) //FIXME: не уверен для x64.
       {
@@ -105,9 +101,6 @@ DWORD WaHook::_hook(HANDLE process, void *functionForHook, void *hookerFunction,
         DWORD_PTR to = (*relAddrSet) + ((DWORD_PTR)functionForHook + opcodeOffset);
         *relAddrSet = (DWORD)(to - ((DWORD_PTR)originalFunction + opcodeOffset));
       }
-#else
-	  //FIXME
-#     endif
       
       if(opcodeOffset >= INJECT_SIZE)break;
     }
@@ -116,11 +109,7 @@ DWORD WaHook::_hook(HANDLE process, void *functionForHook, void *hookerFunction,
     {
       //Дописываем в конец буфера, jump на продолжение functionForHook.
       LPBYTE pjmp = buf + opcodeOffset;
-#if defined _WIN64	  
-      WRITE_JMP(pjmp, originalFunction/* + opcodeOffset*/, (LPBYTE)functionForHook + opcodeOffset);
-#else	  
       WRITE_JMP(pjmp, originalFunction/* + opcodeOffset*/, functionForHook/* + opcodeOffset*/);
-#endif
       if(CWA(kernel32, WriteProcessMemory)(process, originalFunction, buf, opcodeOffset + JMP_ADDR_SIZE, NULL) == 0)goto END;
     }
 
@@ -161,15 +150,9 @@ bool WaHook::_unhook(HANDLE process, void *hookedFunction, void *originalFunctio
 
 bool WaHook::_isHooked(HANDLE process, void *function)
 {
-#if defined _WIN64 
-  WORD opcode = 0; 
-  if(CWA(kernel32, ReadProcessMemory)(process, function, &opcode, 2, NULL) != FALSE && opcode == OPCODE_JMP)return true;
-  return false;
-#else
   BYTE opcode = 0; 
   if(CWA(kernel32, ReadProcessMemory)(process, function, &opcode, 1, NULL) != FALSE && opcode == OPCODE_JMP)return true;
   return false;
-#endif  
 }
 
 void *WaHook::_allocBuffer(HANDLE process, DWORD maxFunctions)

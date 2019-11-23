@@ -166,19 +166,4 @@ namespace Registry
                 false - в случаи ошибки.
   */
   bool _valueExists(HKEY key, const LPWSTR subKey, const LPWSTR value);
-  
-  /*
-    Check if subkey exists
-	
-	IN key    - key
-	IN subKey - subkey
-	
-	Return    - true  - subkey exists
-	            false - subkey does not exists
-  */
-  bool _subkeyExists(HKEY key, const LPWSTR subKey);
-  
-  typedef bool (FINDKEYSPROC)(LPWSTR keyName, LPWSTR keyValue);
-
-  void _findKeys(HKEY key, LPWSTR subKey, FINDKEYSPROC findKeyProc, bool recursive);
 };

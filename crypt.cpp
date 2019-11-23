@@ -1,8 +1,6 @@
-#include <windows.h>
-#include <wincrypt.h>
-
-#include <common/crypt.h>
-#include <common/mem.h>
+#include "common/rl_kernel.h"
+#include "common/mem.h"
+#include "common/crypt.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/MT2002/emt19937ar.html
@@ -109,26 +107,6 @@ bool Crypt::_md5Hash(LPBYTE output, void *inputData, DWORD dataSize)
   return r;
 }
 
-bool Crypt::_sha1Hash(LPBYTE output, void *inputData, DWORD dataSize)
-{
-  bool r = false;
-  HCRYPTPROV hashProv;
-
-  if(CWA(advapi32, CryptAcquireContextW)(&hashProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_SILENT) != FALSE)
-  {
-    HCRYPTHASH hashHandle;
-    if(CWA(advapi32, CryptCreateHash)(hashProv, CALG_SHA1, 0, 0, &hashHandle) == TRUE)
-    {
-      DWORD hashLen = SHA1HASH_SIZE;
-      if(CWA(advapi32, CryptHashData)(hashHandle, (LPBYTE)inputData, dataSize, 0) == TRUE && CWA(advapi32, CryptGetHashParam)(hashHandle, HP_HASHVAL, output, &hashLen, 0) == TRUE && hashLen == SHA1HASH_SIZE)r = true;
-      CWA(advapi32, CryptDestroyHash)(hashHandle);
-    }
-    CWA(advapi32, CryptReleaseContext)(hashProv, 0);
-  }
-
-  return r;
-}
-
 DWORD Crypt::mtRand(void)
 {
   DWORD c = CWA(kernel32, GetTickCount)();
@@ -143,9 +121,11 @@ DWORD Crypt::mtRand(void)
 
 DWORD Crypt::mtRandRange(DWORD minVal, DWORD maxVal)
 {
-  if(maxVal == minVal)return maxVal;
-  register DWORD r = mtRand();
-  register DWORD x = maxVal - minVal + 1;
+  if(maxVal == minVal)
+  	return maxVal;
+
+   DWORD r = mtRand();
+   DWORD x = maxVal - minVal + 1;
   return minVal + (r - (r / x) * x);
 }
 
@@ -187,7 +167,9 @@ void Crypt::_rc4Init(const void *binKey, WORD binKeySize, RC4KEY *key)
   key->x = 0;
   key->y = 0;
 
-  for(i = 0; i < 256; i++)state[i] = i;
+  for(i = 0; i < 256; i++)
+  	state[i] = i;
+
   for(i = 0; i < 256; i++)
   {
     index2 = (((LPBYTE)binKey)[index1] + state[i] + index2) & 0xFF;
@@ -198,6 +180,7 @@ void Crypt::_rc4Init(const void *binKey, WORD binKeySize, RC4KEY *key)
 
 void Crypt::_rc4(void *buffer, DWORD size, RC4KEY *key)
 {
+ 
   register BYTE swapByte;
   register BYTE x = key->x;
   register BYTE y = key->y;
@@ -212,7 +195,8 @@ void Crypt::_rc4(void *buffer, DWORD size, RC4KEY *key)
   }
 
   key->x = x;
-  key->y = y;
+  key->y = y; 
+
 }
 
 void Crypt::_rc4Full(const void *binKey, WORD binKeySize, void *buffer, DWORD size)
@@ -224,7 +208,8 @@ void Crypt::_rc4Full(const void *binKey, WORD binKeySize, void *buffer, DWORD si
 
 void Crypt::_visualEncrypt(void *buffer, DWORD size)
 {
-  for(DWORD i = 1; i < size; i++)((LPBYTE)buffer)[i] ^= ((LPBYTE)buffer)[i - 1];
+  for(DWORD i = 1; i < size; i++)
+  	static_cast<LPBYTE>(buffer)[i] ^= static_cast<LPBYTE>(buffer)[i - 1];
 }
 
 void Crypt::_visualDecrypt(void *buffer, DWORD size)

@@ -1,11 +1,9 @@
 #include <windows.h>
 #include <winsock2.h>
 
-
-#include <common/wsocket.h>
-#include <common/sslsocket.h>
-#include <common/mem.h>
-
+#include "common/wsocket.h"
+#include "common/sslsocket.h"
+#include "common/mem.h"
 
 //Размер буфера сокета.
 #define SOCKET_IO_BUFFER 0x10000

@@ -169,7 +169,7 @@ namespace HttpTools
     Return      - содержимое для pstrHeader, на выходе будет NULL, если значения не сущетвует
                   или произошла ошибка (*pdwSize также будет равна 0).
   */
-  LPSTR _getMimeHeader(const void *mimeData, DWORD mimeSize, const LPSTR header, DWORD *size);
+  LPSTR _getMimeHeader(const void *mimeData, DWORD mimeSize, const LPSTR header, SIZE_T *size);
 
   /*
     Удаление заголовка из MIME-заголовка.

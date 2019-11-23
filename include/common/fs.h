@@ -1,20 +1,11 @@
 #pragma once
-/*
-  Инструменты для работы с файловой системой.
-*/
 
-#if !defined FS_ALLOW_FILEMAPPING
-#  error FS_ALLOW_FILEMAPPING not defined!
-#endif
 
 namespace Fs
 {
-  //Флаги для _fileToMem
+
   enum
   {
-#   if(FS_ALLOW_FILEMAPPING > 0)
-    FTOMF_WRITE_ACCESS = 0x1, //Открыть файл на запись.
-#   endif
     FTOMF_SHARE_WRITE  = 0x2, //Открыть файл, даже если он чем-то открыт для записи.
   };
 
@@ -31,9 +22,6 @@ namespace Fs
     LPBYTE data; //Содержимое файла.
     SIZE_T size; //Размер данных.
     HANDLE file; //Хэндл файла.
-#   if(FS_ALLOW_FILEMAPPING > 0)
-    HANDLE map;  //Хэндл образа.
-#   endif
   }MEMFILE;
 
   /*
@@ -79,7 +67,7 @@ namespace Fs
     Return      - true - в случаи успешной загрузки образа,
                   false - в случаи ошибки, или размера файла более 4Gb.
   */
-  bool _fileToMem(LPWSTR fileName, MEMFILE *mem, DWORD flags);
+  bool _fileToMem(LPWSTR fileName, MEMFILE *mem, DWORD flags, bool mapping = false);
 
   /*
     Закрывает файл открытый FileToMem.
@@ -381,6 +369,4 @@ namespace Fs
     IN c          - новый символ.
   */
   void _replaceSlashes(LPWSTR string, WCHAR c);
-
-  bool _fileExists(LPWSTR path);
 };

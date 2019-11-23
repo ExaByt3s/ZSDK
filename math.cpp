@@ -1,7 +1,7 @@
-#include <windows.h>
+#include "common/rl_kernel.h"
+#include "common/mem.h"
+#include "common/math.h"
 
-#include <common/math.h>
-#include <common/mem.h>
 
 typedef union
 {

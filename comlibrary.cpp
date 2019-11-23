@@ -1,7 +1,8 @@
-#include <windows.h>
-#include <objbase.h>
+#include "common/rl_kernel.h"
 
-#include <common/comlibrary.h>
+#include "common/defines.h"
+#include "common/comlibrary.h"
+
 
 void ComLibrary::init(void)
 {
@@ -22,7 +23,9 @@ bool ComLibrary::_initThread(HRESULT *result)
 
 void ComLibrary::_uninitThread(HRESULT initResult)
 {
-  if(initResult == S_OK || initResult == S_FALSE)CWA(ole32, CoUninitialize)();
+  if(initResult == S_OK || initResult == S_FALSE)
+  	CWA(ole32, CoUninitialize)();
+
 }
 
 void *ComLibrary::_createInterface(REFCLSID clsid, REFIID iid)

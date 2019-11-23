@@ -1,12 +1,12 @@
-#include <windows.h>
-#include <shlwapi.h>
-
-#include <common/mem.h>
+#include <common/rl_kernel.h>
 #include <common/str.h>
+#include <common/mem.h>
 #include <common/math.h>
 
+//FIXME: Переопределить размеры из int в DWORD/SIZE_T.
 
 
+//Максимальный размер строки для _sprintfExX
 #define MAX_SPRINTF_STRING_SIZE (10 * 1024 * 1024)
 
 static int unicodeToX(DWORD codePage, const LPWSTR source, int sourceSize, LPSTR dest, int destSize)
@@ -221,7 +221,7 @@ void Str::_CopyA(LPSTR pstrDest, LPCSTR pstrSource, int iSize)
   pstrDest[iSize] = 0;
 }
 
-LPSTR Str::_CopyExA(LPSTR pstrSource, int iSize, bool putNull)
+LPSTR Str::_CopyExA(LPSTR pstrSource, int iSize)
 {
   if(pstrSource == NULL)return NULL;
   if(iSize == -1)iSize = _LengthA(pstrSource);
@@ -229,7 +229,7 @@ LPSTR Str::_CopyExA(LPSTR pstrSource, int iSize, bool putNull)
   if(p != NULL)
   {
     Mem::_copy(p, pstrSource, iSize);
-    if(putNull) p[iSize] = 0;
+    //p[iSize] = 0;
   }
   return p;
 }
@@ -239,7 +239,7 @@ void Str::_catA(LPSTR buf, LPSTR source, int size)
   _CopyA(buf + _LengthA(buf), source, size);
 }
 
-bool Str::_CatExA(LPSTR *ppstrBuf, LPSTR pstrSource, int iSize, bool putNull)
+bool Str::_CatExA(LPSTR *ppstrBuf, LPSTR pstrSource, int iSize)
 {
   if(pstrSource != NULL)
   {
@@ -249,7 +249,7 @@ bool Str::_CatExA(LPSTR *ppstrBuf, LPSTR pstrSource, int iSize, bool putNull)
     if(Mem::reallocEx(ppstrBuf, iBufSize + iSize + 1))
     {
       Mem::_copy((*ppstrBuf) + iBufSize, pstrSource, iSize);
-      if(putNull) (*ppstrBuf)[iSize] = 0;
+      //(*ppstrBuf)[iSize] = 0;
       return true;
     }
   }
@@ -1362,435 +1362,134 @@ SIZE_T Str::_getCurrentStringSizeA(const LPSTR string, const LPSTR memEnd, LPSTR
   return curSize;
 }
 
-//#define engCharToLower(c) (c >= 'A' && c <= 'Z' ? c - 'A' + 'a' : c)
-//bool Str::_matchA(MATCHDATAA *md)
-//{
-///*
-//// MEM_PERSONAL_HEAP is 1 only in client, so wont screw builder compilation
-//#if(MEM_PERSONAL_HEAP == 1)
-//#if defined WDEBUG2
-//LPWSTR string = _ansiToUnicodeEx(md->string, _LengthA(md->string));
-//LPWSTR mask = _ansiToUnicodeEx(md->mask, _LengthA(md->mask));
-//WDEBUG2(WDDT_INFO, "string: %s, mask: %s", string, mask);
-//Mem::free(string);
-//Mem::free(mask);
-//#endif
-//#endif
-//*/
-//  if(md->flags & MATCH_SEARCH_SUBSSTRING)
-//  {
-//    MATCHDATAA subMd;
-//    Mem::_copy(&subMd, md, sizeof(MATCHDATAA));
-//
-//    subMd.flags &= ~MATCH_SEARCH_SUBSSTRING;
-//    for(DWORD stringOffset = 0; stringOffset < md->stringSize; stringOffset++)
-//    {
-//      subMd.string     = md->string + stringOffset;
-//      subMd.stringSize = md->stringSize - stringOffset;
-//
-//      if(_matchA(&subMd))
-//      {
-//        md->endOfMatch   = stringOffset + subMd.endOfMatch;
-//        md->beginOfMatch = stringOffset;
-//        return true;
-//      }
-//    }
-//
-//    md->beginOfMatch = 0;
-//    md->endOfMatch   = 0;
-//    return false;
-//  }
-//  
-//  md->beginOfMatch = 0;
-//  for(DWORD stringOffset = 0, maskOffset = 0;; stringOffset++, maskOffset++)
-//  {
-//    //Достигнут конец маски.
-//    if(maskOffset == md->maskSize)
-//    {
-//      md->endOfMatch = stringOffset;
-//      return (md->flags & MATCH_FULL_EQUAL ? (stringOffset == md->stringSize) : true);
-//    }
-//
-//    char maskChar = md->mask[maskOffset];
-//
-//    //Просто пропускаем символ.
-//    if(maskChar == md->anyCharSymbol)
-//    {
-//      //Достигли конец строки. Провал...
-//      if(stringOffset == md->stringSize)
-//      {
-//        md->endOfMatch = stringOffset; 
-//        return false;
-//      }
-//    }
-//    else if(maskChar == md->anyCharsSymbol)
-//    {
-//      while(++maskOffset < md->maskSize && md->mask[maskOffset] == md->anyCharsSymbol);
-//      
-//      //Маска распрострониться до конца строки.
-//      if(maskOffset == md->maskSize)
-//      {
-//        md->endOfMatch = md->stringSize; 
-//        return true;
-//      }
-//      
-//      //Создаем копию структуры со смешением.
-//      MATCHDATAA subMd;
-//      bool r;
-//
-//      Mem::_copy(&subMd, md, sizeof(MATCHDATAA));
-//      subMd.mask     += maskOffset;
-//      subMd.maskSize -= maskOffset;
-//      md->endOfMatch  = stringOffset;
-//
-//      for(; stringOffset < md->stringSize; stringOffset++)
-//      {
-//        subMd.string     = md->string     + stringOffset;
-//        subMd.stringSize = md->stringSize - stringOffset;
-//        
-//        r = _matchA(&subMd);
-//        md->endOfMatch = stringOffset + subMd.endOfMatch;
-//        if(r)return true;
-//      }
-//      return false;
-//    }
-//    else
-//    {
-//      if(stringOffset == md->stringSize)
-//      {
-//        md->endOfMatch = stringOffset;
-//        return false;
-//      }
-//      
-//      char stringChar = md->string[stringOffset];
-//      
-//      //Меняем регистр.
-//      if(md->flags & (MATCH_CASE_INSENSITIVE_FAST | MATCH_CASE_INSENSITIVE))
-//      {
-//        if(md->flags & MATCH_CASE_INSENSITIVE_FAST)
-//        {
-//          maskChar   = engCharToLower(maskChar);
-//          stringChar = engCharToLower(stringChar);
-//        }
-//        else
-//        {
-//          maskChar   = ((DWORD_PTR)(CWA(user32, CharLowerA)((LPSTR)maskChar)))   & 0xFF;
-//          stringChar = ((DWORD_PTR)(CWA(user32, CharLowerA)((LPSTR)stringChar))) & 0xFF;
-//        }
-//      }
-//      
-//      //Символы не равны.
-//      if(maskChar != stringChar)
-//      {
-//        if(md->flags & MATCH_UNIVERSAL_NEWLINE)
-//        {
-//          if(maskChar == '\n' && stringChar == '\r' && stringOffset + 1 < md->stringSize && md->string[stringOffset + 1] == '\n')
-//          {
-//            stringOffset++;
-//            continue;
-//          }
-//
-//          if(stringChar == '\n' && maskChar == '\r' && maskOffset + 1 < md->maskSize && md->mask[maskOffset + 1] == '\n')
-//          {
-//            maskOffset++;
-//            continue;
-//          }
-//        }
-//
-//        md->endOfMatch  = stringOffset;
-//        return false;
-//      }
-//    }
-//  }
-//}
-//#undef engCharToLower
-
 #define engCharToLower(c) (c >= 'A' && c <= 'Z' ? c - 'A' + 'a' : c)
-static LPSTR _findCharCaseInsensitiveFastA(const LPSTR string, char c, DWORD dwLength)
-{
-	if(dwLength == 0 || string == NULL) return NULL;
-	LPSTR p = string;
-	c = engCharToLower(c);
-	char x;
-	while(dwLength)
-	{
-		x = *p;	// using macro directly on *p might result in multiple memory accesses
-		x = engCharToLower(x);
-		if(x == c)
-			break;
-		p++; dwLength--;
-	}
-	if(x == c) return (LPSTR)p;
-	else return NULL;
-}
-
-static LPSTR _findCharCaseInsensitiveSlowA(const LPSTR string, char c, DWORD dwLength)
-{
-	if(dwLength == 0 || string == NULL) return NULL;
-	LPSTR p = string;
-	char x;
-	c = (DWORD_PTR)(CharLowerA((LPSTR)c));
-	while(dwLength)
-	{
-		x = (DWORD_PTR)(CharLowerA((LPSTR)*p));
-		if(x == c)
-			break;
-		p++; dwLength--;
-	}
-	if(x == c) return (LPSTR)p;
-	else return NULL;
-}
-
-static LPSTR _findCharCaseSensitiveA(const LPSTR string, char c, DWORD dwLength)
-{
-	if(dwLength == 0 || string == NULL) return NULL;
-	LPSTR p = string;
-	while(dwLength && *p != c)
-	{
-		p++; dwLength--;
-	}
-	if(dwLength && *p == c) return (LPSTR)p;
-	else return NULL;
-}
-typedef LPSTR (*LP_FINDCHAR_PROC)(const LPSTR string, char c, DWORD dwLength);
-
 bool Str::_matchA(MATCHDATAA *md)
 {
-	if(md->flags & MATCH_SEARCH_SUBSSTRING)
-	{
-		MATCHDATAA subMd;
-		Mem::_copy(&subMd, md, sizeof(MATCHDATAA));
+  if(md->flags & MATCH_SEARCH_SUBSSTRING)
+  {
+    MATCHDATAA subMd;
+    Mem::_copy(&subMd, md, sizeof(MATCHDATAA));
 
-		subMd.flags &= ~MATCH_SEARCH_SUBSSTRING;
+    subMd.flags &= ~MATCH_SEARCH_SUBSSTRING;
+    for(DWORD stringOffset = 0; stringOffset < md->stringSize; stringOffset++)
+    {
+      subMd.string     = md->string + stringOffset;
+      subMd.stringSize = md->stringSize - stringOffset;
 
-		// saves us from doing this in each iteration
-		LP_FINDCHAR_PROC lp_findCharA = _findCharCaseSensitiveA;
-		if(md->flags & MATCH_CASE_INSENSITIVE_FAST)
-			lp_findCharA = _findCharCaseInsensitiveFastA;
-		else if(md->flags & MATCH_CASE_INSENSITIVE)
-			lp_findCharA = _findCharCaseInsensitiveSlowA;
-		
-		// skip * in the begining of the mask
-		DWORD maskOffset = 0, charsToSkip = 0;
-StripWildcards:
-		if(subMd.mask[0] == subMd.anyCharsSymbol)
-		{
-			while(++maskOffset < subMd.maskSize && subMd.mask[maskOffset] == subMd.anyCharsSymbol);
-			
-			if(maskOffset == subMd.maskSize)	// mask ends with *
-			{
-				md->beginOfMatch = 0;
-				md->endOfMatch = md->stringSize;
-				return true;
-			}
-			subMd.mask     += maskOffset;
-			subMd.maskSize -= maskOffset;
-		}
-		
-		if(subMd.mask[0] == subMd.anyCharSymbol)
-		{
-			while(++charsToSkip < subMd.maskSize && subMd.mask[charsToSkip] == subMd.anyCharSymbol);
-			
-			// not enough symbols left, cant be match
-			if(subMd.stringSize < charsToSkip)
-			{
-				md->beginOfMatch = 0;
-				md->endOfMatch   = 0;
-				return false;
-			}
-			else if(/*subMd.stringSize >= charsToSkip && */subMd.maskSize == charsToSkip)
-			{
-				md->beginOfMatch = 0;
-				md->endOfMatch   = charsToSkip;
-				return true;
-			}
+      if(_matchA(&subMd))
+      {
+        md->endOfMatch   = stringOffset + subMd.endOfMatch;
+        md->beginOfMatch = stringOffset;
+        return true;
+      }
+    }
 
-			subMd.string	 += charsToSkip;
-			subMd.stringSize -= charsToSkip;
-			subMd.mask		 += charsToSkip;
-			subMd.maskSize   -= charsToSkip;
-			goto StripWildcards;	// in case pattern is like ???*
-		}
-		
-		char maskChar = subMd.mask[0];
+    md->beginOfMatch = 0;
+    md->endOfMatch   = 0;
+    return false;
+  }
+  
+  md->beginOfMatch = 0;
+  for(DWORD stringOffset = 0, maskOffset = 0;; stringOffset++, maskOffset++)
+  {
+    //Достигнут конец маски.
+    if(maskOffset == md->maskSize)
+    {
+      md->endOfMatch = stringOffset;
+      return (md->flags & MATCH_FULL_EQUAL ? (stringOffset == md->stringSize) : true);
+    }
 
-		if(md->flags & MATCH_UNIVERSAL_NEWLINE && maskChar == '\r')
-			maskChar = '\n';
+    char maskChar = md->mask[maskOffset];
 
-		LPSTR matchStart = lp_findCharA(subMd.string, maskChar, subMd.stringSize);
-		while(matchStart)
-		{
-			subMd.string     = matchStart;
-			subMd.stringSize = md->stringSize - (matchStart - md->string);
+    //Просто пропускаем символ.
+    if(maskChar == md->anyCharSymbol)
+    {
+      //Достигли конец строки. Провал...
+      if(stringOffset == md->stringSize)
+      {
+        md->endOfMatch = stringOffset; 
+        return false;
+      }
+    }
+    else if(maskChar == md->anyCharsSymbol)
+    {
+      while(++maskOffset < md->maskSize && md->mask[maskOffset] == md->anyCharsSymbol);
+      
+      //Маска распрострониться до конца строки.
+      if(maskOffset == md->maskSize)
+      {
+        md->endOfMatch = md->stringSize; 
+        return true;
+      }
+      
+      //Создаем копию структуры со смешением.
+      MATCHDATAA subMd;
+      bool r;
 
-			if(_matchA(&subMd))
-			{
-				md->beginOfMatch = (matchStart - md->string);
-				md->endOfMatch   = md->beginOfMatch + subMd.endOfMatch;
-				return true;
-			}
-			matchStart = lp_findCharA(matchStart + 1, maskChar, subMd.stringSize - 1);
-		}
+      Mem::_copy(&subMd, md, sizeof(MATCHDATAA));
+      subMd.mask     += maskOffset;
+      subMd.maskSize -= maskOffset;
+      md->endOfMatch  = stringOffset;
 
-		md->beginOfMatch = 0;
-		md->endOfMatch   = 0;
-		return false;
-	}
+      for(; stringOffset < md->stringSize; stringOffset++)
+      {
+        subMd.string     = md->string     + stringOffset;
+        subMd.stringSize = md->stringSize - stringOffset;
+        
+        r = _matchA(&subMd);
+        md->endOfMatch = stringOffset + subMd.endOfMatch;
+        if(r)return true;
+      }
+      return false;
+    }
+    else
+    {
+      if(stringOffset == md->stringSize)
+      {
+        md->endOfMatch = stringOffset;
+        return false;
+      }
+      
+      char stringChar = md->string[stringOffset];
+      
+      //Меняем регистр.
+      if(md->flags & (MATCH_CASE_INSENSITIVE_FAST | MATCH_CASE_INSENSITIVE))
+      {
+        if(md->flags & MATCH_CASE_INSENSITIVE_FAST)
+        {
+          maskChar   = engCharToLower(maskChar);
+          stringChar = engCharToLower(stringChar);
+        }
+        else
+        {
+          maskChar   = ((DWORD_PTR)(CWA(user32, CharLowerA)((LPSTR)maskChar)))   & 0xFF;
+          stringChar = ((DWORD_PTR)(CWA(user32, CharLowerA)((LPSTR)stringChar))) & 0xFF;
+        }
+      }
+      
+      //Символы не равны.
+      if(maskChar != stringChar)
+      {
+        if(md->flags & MATCH_UNIVERSAL_NEWLINE)
+        {
+          if(maskChar == '\n' && stringChar == '\r' && stringOffset + 1 < md->stringSize && md->string[stringOffset + 1] == '\n')
+          {
+            stringOffset++;
+            continue;
+          }
 
-	md->beginOfMatch = 0;
-	for(DWORD stringOffset = 0, maskOffset = 0;; stringOffset++, maskOffset++)
-	{
-		//Достигнут конец маски.
-		if(maskOffset == md->maskSize)
-		{
-			md->endOfMatch = stringOffset;
-			return (md->flags & MATCH_FULL_EQUAL ? (stringOffset == md->stringSize) : true);
-		}
+          if(stringChar == '\n' && maskChar == '\r' && maskOffset + 1 < md->maskSize && md->mask[maskOffset + 1] == '\n')
+          {
+            maskOffset++;
+            continue;
+          }
+        }
 
-		char maskChar = md->mask[maskOffset];
-
-		//Просто пропускаем символ.
-		if(maskChar == md->anyCharSymbol)
-		{
-			//Достигли конец строки. Провал...
-			if(stringOffset == md->stringSize)
-			{
-				md->endOfMatch = stringOffset; 
-				return false;
-			}
-		}
-		else if(maskChar == md->anyCharsSymbol)
-		{
-			MATCHDATAA subMd;
-			bool r;
-			DWORD charsToSkip = 0;
-			Mem::_copy(&subMd, md, sizeof(MATCHDATAA));
-			subMd.mask     += maskOffset;
-			subMd.maskSize -= maskOffset;
-			md->endOfMatch  = stringOffset;
-
-			LP_FINDCHAR_PROC lp_findCharA = _findCharCaseSensitiveA;
-			if(md->flags & MATCH_CASE_INSENSITIVE_FAST)
-				lp_findCharA = _findCharCaseInsensitiveFastA;
-			else if(md->flags & MATCH_CASE_INSENSITIVE)
-				lp_findCharA = _findCharCaseInsensitiveSlowA;
-
-StripWildcards2:
-			if(subMd.mask[0] == subMd.anyCharsSymbol)
-			{
-				while(++charsToSkip < subMd.maskSize && subMd.mask[charsToSkip] == subMd.anyCharsSymbol);
-			
-				if(charsToSkip == subMd.maskSize)	// mask ends with *
-				{
-					md->endOfMatch = md->stringSize;
-					return true;
-				}
-				subMd.mask     += charsToSkip;
-				subMd.maskSize -= charsToSkip;
-			}
-			charsToSkip = 0;
-			if(subMd.mask[0] == subMd.anyCharSymbol)
-			{
-				while(++charsToSkip < subMd.maskSize && subMd.mask[charsToSkip] == subMd.anyCharSymbol);
-			
-				// not enough symbols left, cant be match
-				if(subMd.stringSize < charsToSkip)
-				{
-					md->endOfMatch = md->stringSize;
-					return false;
-				}
-				// first part always true
-				else if(/*subMd.stringSize >= charsToSkip && */subMd.maskSize == charsToSkip)
-				{
-					md->endOfMatch = stringOffset + charsToSkip;
-					return (md->flags & MATCH_FULL_EQUAL ? (md->endOfMatch == md->stringSize) : true);
-				}
-
-				subMd.string	 += charsToSkip;
-				subMd.stringSize -= charsToSkip;
-				subMd.mask		 += charsToSkip;
-				subMd.maskSize   -= charsToSkip;
-				stringOffset     += charsToSkip;
-				goto StripWildcards;	// in case pattern is like ???*, tho what would be the point of having different wildcards after each other?
-			}
-
-			char maskFirstChar = subMd.mask[0];
-
-			if(md->flags & MATCH_UNIVERSAL_NEWLINE && maskChar == '\r')
-				maskChar = '\n';
-
-			LPSTR matchStart = lp_findCharA(subMd.string, maskFirstChar, subMd.stringSize);
-			while(matchStart)
-			{
-				subMd.string     = matchStart;
-				stringOffset     = matchStart - md->string;
-				subMd.stringSize = md->stringSize - stringOffset;
-
-				r = _matchA(&subMd);
-				md->endOfMatch = stringOffset + subMd.endOfMatch;
-				if(r)return true;
-
-				matchStart = lp_findCharA(matchStart + 1, maskFirstChar, subMd.stringSize - 1);
-			}
-
-			return false;
-			
-			/*for(; stringOffset < md->stringSize; stringOffset++)
-			{
-				subMd.string     = md->string     + stringOffset;
-				subMd.stringSize = md->stringSize - stringOffset;
-
-				r = _matchA(&subMd);
-				md->endOfMatch = stringOffset + subMd.endOfMatch;
-				if(r)return true;
-			}
-			return false;*/
-		}
-		else
-		{
-			if(stringOffset == md->stringSize)
-			{
-				md->endOfMatch = stringOffset;
-				return false;
-			}
-
-			char stringChar = md->string[stringOffset];
-
-			//Меняем регистр.
-			if(md->flags & MATCH_CASE_INSENSITIVE_FAST)
-			{
-				maskChar   = engCharToLower(maskChar);
-				stringChar = engCharToLower(stringChar);
-			}
-			else if(md->flags & MATCH_CASE_INSENSITIVE)
-			{
-				maskChar   = ((DWORD_PTR)(CharLowerA((LPSTR)maskChar)))   & 0xFF;
-				stringChar = ((DWORD_PTR)(CharLowerA((LPSTR)stringChar))) & 0xFF;
-			}
-
-			//Символы не равны.
-			if(maskChar != stringChar)
-			{
-				if(md->flags & MATCH_UNIVERSAL_NEWLINE)
-				{
-					if(maskChar == '\n' && stringChar == '\r' && stringOffset + 1 < md->stringSize && md->string[stringOffset + 1] == '\n')
-					{
-						stringOffset++;
-						continue;
-					}
-
-					if(stringChar == '\n' && maskChar == '\r' && maskOffset + 1 < md->maskSize && md->mask[maskOffset + 1] == '\n')
-					{
-						maskOffset++;
-						continue;
-					}
-				}
-
-				md->endOfMatch  = stringOffset;
-				return false;
-			}
-		}
-	}
+        md->endOfMatch  = stringOffset;
+        return false;
+      }
+    }
+  }
 }
 #undef engCharToLower
 

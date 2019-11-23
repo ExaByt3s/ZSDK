@@ -1,199 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)backconnect.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)baseoverlay.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)comlibrary.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)binstorage.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)console.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)crypt.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)debug.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)disasm.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)fs.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)gdi.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)httpinject.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)httptools.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)malwaretools.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)math.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)mem.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)mscab.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)peimage.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)process.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)registry.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)sslsocket.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)str.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)sync.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)threadsgroup.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)time.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)ucl.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)wahook.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)winsecurity.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)wsocket.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)xmlparser.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)wininet.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\binstorage.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\botstatus.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\baseoverlay.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\comlibrary.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\backconnect.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\crypt.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\console.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\debug.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\defines.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\fs.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\gdi.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\disasm.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\httptools.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\httpinject.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\str.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\sync.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\sslsocket.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\registry.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\process.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\peimage.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\ntdll.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\math.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\mscab.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\ucl.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\wsocket.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\xmlparser.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\threadsgroup.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\time.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\wahook.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\wininet.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\mem.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\malwaretools.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\winsecurity.h">
-      <Filter>include</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="include">
       <UniqueIdentifier>{2323c1b9-16f6-4364-bea3-10fc00683357}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
@@ -202,5 +9,66 @@
       <UniqueIdentifier>{9a2d7ea7-77e5-4381-b992-2c0860c7f1ea}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\mem.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\sync.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\winnet.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\httptools.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\str.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\math.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\fs.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\crypt.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\time.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\common\defines.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)mem.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)sync.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)winnet.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)httptools.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)str.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)math.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)fs.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)crypt.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)time.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

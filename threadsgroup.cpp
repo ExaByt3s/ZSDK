@@ -1,7 +1,8 @@
-#include <windows.h>
+#include "common/rl_kernel.h"
+#include "common/mem.h"
+#include "common/threadsgroup.h"
 
-#include <common/threadsgroup.h>
-#include <common/mem.h>
+
 
 void ThreadsGroup::init(void)
 {

@@ -1,10 +1,8 @@
-#include <windows.h>
-#include <winsock2.h>
 
-#include <common/backconnect.h>
-#include <common/mem.h>
-#include <common/wsocket.h>
-
+#include "common/rl_kernel.h"
+#include "common/mem.h"
+#include "common/backconnect.h"
+#include "common/wsocket.h"
 
 
 void Backconnect::init(void)

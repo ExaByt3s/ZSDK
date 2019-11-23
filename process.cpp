@@ -1,13 +1,13 @@
 #include <windows.h>
-#include <shlwapi.h>
 #include <psapi.h>
+#include <shlwapi.h>
 #include <tlhelp32.h>
   
-#include <common/process.h>
-#include <common/mem.h>
-#include <common/str.h>
-#include <common/fs.h>
-#include <common/winsecurity.h>
+#include "common/process.h"
+#include "common/mem.h"
+#include "common/str.h"
+#include "common/fs.h"
+#include "common/winsecurity.h"
 
 
 void Process::init(void)
@@ -269,12 +269,14 @@ DWORD Process::_createEx(const LPWSTR module, const LPWSTR commandLine, const LP
   LPWSTR realCommandLine;
 
   int r;
-  if(commandLine == NULL)r = Str::_sprintfExW(&realCommandLine, L"\"%s\"", module);
-  else r = Str::_sprintfExW(&realCommandLine, L"\"%s\" %s", module, commandLine);
+  if(commandLine == nullptr)
+  	r = Str::_sprintfExW(&realCommandLine, L"\"%s\"", module);
+  else
+  	r = Str::_sprintfExW(&realCommandLine, L"\"%s\" %s", module, commandLine);
   
   if(r > 0)
   {
-    pid = _create(NULL, realCommandLine, workDir, starupInfo, pi);
+    pid = _create(nullptr, realCommandLine, workDir, starupInfo, pi);
     Mem::free(realCommandLine);
   }
   return pid;

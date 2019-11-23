@@ -1,6 +1,5 @@
-#include <windows.h>
-
-#include <common/sync.h>
+#include "common/rl_kernel.h"
+#include "common/sync.h"
 
 void Sync::init(void)
 {
@@ -10,6 +9,18 @@ void Sync::init(void)
 void Sync::uninit(void)
 {
 
+}
+
+HANDLE Sync::_waitForMutex(SECURITY_ATTRIBUTES *mutexAttributes, LPWSTR name)
+{
+  HANDLE mutexHandle = CWA(kernel32, CreateMutexW)(mutexAttributes, FALSE, name);
+  if(mutexHandle != NULL)
+  {
+    DWORD r = CWA(kernel32, WaitForSingleObject)(mutexHandle, INFINITE);
+    if(r == WAIT_OBJECT_0 || r == WAIT_ABANDONED)return mutexHandle;
+    CWA(kernel32, CloseHandle)(mutexHandle);
+  }
+  return NULL;
 }
 
 DWORD Sync::_waitForMultipleObjectsAndDispatchMessages(DWORD count, const HANDLE* handles, bool waitAll, DWORD milliseconds)
@@ -30,18 +41,6 @@ DWORD Sync::_waitForMultipleObjectsAndDispatchMessages(DWORD count, const HANDLE
 
 END:
   return retVal;
-}
-
-HANDLE Sync::_waitForMutex(SECURITY_ATTRIBUTES *mutexAttributes, LPWSTR name)
-{
-  HANDLE mutexHandle = CWA(kernel32, CreateMutexW)(mutexAttributes, FALSE, name);
-  if(mutexHandle != NULL)
-  {
-    DWORD r = CWA(kernel32, WaitForSingleObject)(mutexHandle, INFINITE);
-    if(r == WAIT_OBJECT_0 || r == WAIT_ABANDONED)return mutexHandle;
-    CWA(kernel32, CloseHandle)(mutexHandle);
-  }
-  return NULL;
 }
 
 void Sync::_freeMutex(HANDLE mutex)

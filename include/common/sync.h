@@ -5,7 +5,6 @@
 
 namespace Sync
 {
-	
   /*
     Инициализация.
   */
@@ -28,6 +27,17 @@ namespace Sync
   */
   HANDLE _waitForMutex(SECURITY_ATTRIBUTES *mutexAttributes, LPWSTR name);
 
+  /*
+    Ожидание событие, и обработка всех оконных сообщений потока.
+
+    IN count        - кол. объектов.
+    IN handles      - объекты.
+    IN waitAll      - ждать всех обектов.
+    IN milliseconds - время ожидания в мс, INFINITE для бескоенчного ожидания.
+
+    Return          - согласно WaitForMultipleObjects().
+  */
+  DWORD _waitForMultipleObjectsAndDispatchMessages(DWORD count, const HANDLE* handles, bool waitAll, DWORD milliseconds);
 
   /*
     Освобождение мютекса захваченного через WaitForMutex.
@@ -55,6 +65,4 @@ namespace Sync
               false - не сущетвует.
   */
   bool _mutexExists(LPWSTR name);
-
-  DWORD _waitForMultipleObjectsAndDispatchMessages(DWORD count, const HANDLE* handles, bool waitAll, DWORD milliseconds);
 };

@@ -1,12 +1,6 @@
 #pragma once
 
-#if defined _WIN64
-#define getModuleSize(module) ((PIMAGE_NT_HEADERS64)((LPBYTE)module + ((PIMAGE_DOS_HEADER)module)->e_lfanew))->OptionalHeader.SizeOfImage
-#define getImageBase(module) ((PIMAGE_NT_HEADERS64)((LPBYTE)module + ((PIMAGE_DOS_HEADER)module)->e_lfanew))->OptionalHeader.ImageBase
-#else
-#define getModuleSize(module) ((PIMAGE_NT_HEADERS32)((LPBYTE)module + ((PIMAGE_DOS_HEADER)module)->e_lfanew))->OptionalHeader.SizeOfImage
-#define getImageBase(module) ((PIMAGE_NT_HEADERS32)((LPBYTE)module + ((PIMAGE_DOS_HEADER)module)->e_lfanew))->OptionalHeader.ImageBase
-#endif
+#define CWA(dll, api)                 ::api
 
 //Формирование и и контроль версий.
 #define MAKE_VERSION(a, b, c, d) (((((DWORD)(a)) & 0xFF) << 24) | ((((DWORD)(b)) & 0xFF) << 16) | ((((DWORD)(c)) & 0xFF) << 8) | ((((DWORD)(d)) & 0xFF)))
@@ -23,10 +17,6 @@
 #  define ASM_INTERNAL_DEF __stdcall
 #  define ASM_INTERNAL     __declspec(naked) __stdcall
 #endif
-
-#define ROR(x,n) (((x) >> (n)) | ((x) << (32-(n))))
-#define ROL(x,n) (((x) << (n)) | ((x) >> (32-(n))))
-#define BSWAP(x) (((x) >> 24) | (((x) & 0x00FF0000) >> 8) | (((x) & 0x0000FF00) << 8) | ((x) << 24)) 
 
 //Конвертация BIG_ENDIAN <=> LITTLE_ENDIAN 
 #define SWAP_WORD(s) (((((WORD)(s)) >> 8) & 0x00FF) | ((((WORD)(s)) << 8) & 0xFF00))
@@ -53,8 +43,15 @@
 //Расширение для текстового файла.
 #define FILEEXTENSION_TXT L".txt"
 
+//Номер PE-секции, которая является ключом базовую конфигурацию.
+#define PESECTION_OF_BASECONFIG_KEY 2
+
 //Страница для теста лага.
 #define TESTLATENCY_URL "http://www.google.com/webhp"
+
+//Формат скриншота для UserHook.
+#define USERCLICK2IMAGE_LIMIT  20
+#define USERCLICK2IMAGE_SIZE   500
 
 //Переуд портов для TCP-сервера.
 #define TCPSERVER_PORT_FIRST 10000
@@ -63,6 +60,22 @@
 //Шрифт используемый в диалогах
 #define FONT_DIALOG "MS Shell Dlg 2"
 
-//Формат скриншота для UserHook.
-#define USERCLICK2IMAGE_LIMIT  40
-#define USERCLICK2IMAGE_SIZE   500
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Различные опции, зависимые от опции BO_*.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if(BO_NSPR4 > 0)
+#  define HOOKER_LDRLOADDLL
+#endif
+
+#if(0)
+#  define HOOKER_SETWINDOWTEXT
+#endif
+
+#if(0)
+#  define HOOKER_NTCREATEFILE
+#endif
+
+#if(0)
+#  define HOOKER_SETCHILDPROCESSFLAGS
+#endif

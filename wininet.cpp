@@ -10,18 +10,14 @@ typedef HRESULT(WINAPI *OBTAINUSERAGENTSTRING)(DWORD, LPCSTR, DWORD *);
 
 //User agent
 #define DEFAULT_USER_AGENT "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; SV1)"
-
-//Версия HTTP.
 #define DEFAULT_HTTP_VERSION "HTTP/1.1"
-
-//Размер буфера при скачивании файла
 #define WININET_BUFFER_SIZE 4096
 
 
-//Принимаемые типы.
-static LPSTR AcceptTypes[] = {"*/*", NULL};
 
-//Опции WinInet.
+
+static LPSTR AcceptTypes[] = {"*/*", nullptr};
+
 typedef struct
 {
 	DWORD dwOption;
@@ -32,9 +28,6 @@ static WININETOPTION WinInetOptions[] =
 {
 	//Sets an unsigned long integer value that contains the time-out value, in milliseconds, to use for Internet connection requests.
 	{INTERNET_OPTION_CONNECT_TIMEOUT,  1 * 60 * 1000},
-	//Sets an unsigned long integer value that contains the error masks that can be handled by the client application.
-	//Баг в wininet.dll, повреждает стек или что-то в этом духе.
-	//{INTERNET_OPTION_ERROR_MASK, INTERNET_ERROR_MASK_COMBINED_SEC_CERT | INTERNET_ERROR_MASK_INSERT_CDROM | INTERNET_ERROR_MASK_LOGIN_FAILURE_DISPLAY_ENTITY_BODY},
 	//Sets an unsigned long integer value that contains the time-out value, in milliseconds, to receive a response to a request.
 	{INTERNET_OPTION_RECEIVE_TIMEOUT, 1 * 60 * 1000},
 	//Sets an unsigned long integer value, in milliseconds, that contains the time-out value to send a request.

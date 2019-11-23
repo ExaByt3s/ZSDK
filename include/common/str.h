@@ -174,7 +174,7 @@ namespace Str
 
     Return        - указатель на новую копию строки.
   */
-  LPSTR _CopyExA(LPSTR pstrSource, int iSize, bool putNull = false);
+  LPSTR _CopyExA(LPSTR pstrSource, int iSize);
 
   /*
     Добавление ANSI строки в конец другой строки.
@@ -192,7 +192,7 @@ namespace Str
     IN pstrSource   - исходная строка, может быть NULL.
     IN iSize        - количество символов для копирования, или -1 для полного копирование строки.
   */
-  bool _CatExA(LPSTR *ppstrBuf, LPSTR pstrSource, int iSize, bool putNull = false);
+  bool _CatExA(LPSTR *ppstrBuf, LPSTR pstrSource, int iSize);
   
   /*
     Удаление символов \r, \n, \t и пробела с начала и конца ANSI строки.
@@ -995,5 +995,4 @@ namespace Str
              false - совпадение не найдено.
   */
   bool _matchExA(const LPSTR mask, const LPSTR string);
-
 };

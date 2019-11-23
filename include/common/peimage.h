@@ -274,12 +274,6 @@ namespace PeImage
   DWORD _getCurrentVirtualSize(PEDATA *pedata);
 
   /*
-    Getting number of sections
-	
-	Return - number of sections
-  */
-  DWORD _getNumberOfSections(HMODULE module);
-  /*
     Получение секции из загруженого модуля.
   
     IN hModule      - модуль.
@@ -361,8 +355,4 @@ namespace PeImage
                  false - в случаи ошибки.       
   */
   bool _isPeImage(void *mem, DWORD memSize);
-
-  void normalizeRelocs(void* image, void* OldDelta, void* Delta);
-
-  DWORD createNtCheckSum(LPBYTE image, DWORD size);
 };

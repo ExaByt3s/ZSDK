@@ -1,9 +1,4 @@
-#include <windows.h>
-#include <shlwapi.h>
-#include <fcntl.h>
-#include <fdi.h>
-#include <fci.h>
-
+#include "common/rl_kernel.h"
 #include "common/mscab.h"
 #include "common/mem.h"
 #include "common/fs.h"

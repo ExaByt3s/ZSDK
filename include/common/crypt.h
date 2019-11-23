@@ -3,9 +3,8 @@
   Криптография.
 */
 
-// Sizeof hash
-#define MD5HASH_SIZE  16
-#define SHA1HASH_SIZE 20
+//Размер MD5 хэша.
+#define MD5HASH_SIZE 16
 
 namespace Crypt
 {
@@ -38,18 +37,6 @@ namespace Crypt
                    false - в случаи ошибки.
   */
   bool _md5Hash(LPBYTE output, void *inputData, DWORD dataSize);
-
-  /*
-    hash data by sha1-algo
-
-    OUT output   - output buffer with SHA1HASH_SIZE length 
-    IN inputData - data for hashing
-    IN dataSize  - size of data
-
-    Return       - true - success
-                   false - error
-  */  
-  bool _sha1Hash(LPBYTE output, void *inputData, DWORD dataSize);
 
   /*
     Псевдо-случайный генератор чисел по меоду Mersenne Twister.

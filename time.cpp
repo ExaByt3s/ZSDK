@@ -1,8 +1,6 @@
-#include <windows.h>
-
-#include "common/math.h"
-#include "common/time.h"
-
+#include <common/rl_kernel.h>
+#include <common/math.h>
+#include <common/time.h>
 
 void Time::init(void)
 {

@@ -1,12 +1,14 @@
-#include <windows.h>
+#include "common/rl_kernel.h"
+
+
+#include "common/xmlparser.h"
+#include "common/str.h"
+#include "common/mem.h"
+#include "common/comlibrary.h"
+
+
 #include <comcat.h>
 #include <msxml2.h>
-
-#include <common/xmlparser.h>
-#include <common/str.h>
-#include <common/mem.h>
-#include <common/comlibrary.h>
-
 static IXMLDOMDocument *createAndConfigureInterface(void)
 {
   IXMLDOMDocument *xmlDoc = (IXMLDOMDocument *)ComLibrary::_createInterface(CLSID_DOMDocument30, IID_IXMLDOMDocument);

@@ -1,9 +1,11 @@
-#include <windows.h>
-#include <shlwapi.h>
+#include "common/rl_kernel.h"
 
-#include <common/console.h>
-#include <common/mem.h>
-#include <common/str.h>
+
+
+#include "common/mem.h"
+#include "common/str.h"
+#include "common/console.h"
+
 
 static HANDLE handleOutput;
 static bool isWineBug;

@@ -1,13 +1,10 @@
-#include <windows.h>
-#include <shlwapi.h>
-#include <ws2tcpip.h>
-#include <mstcpip.h>
+#include "common/rl_kernel.h"
 
-#include <common/defines.h>
-#include <common/wsocket.h>
-#include <common/mem.h>
-#include <common/str.h>
-#include <common/crypt.h>
+#include "common/wsocket.h"
+#include "common/mem.h"
+#include "common/str.h"
+#include "common/crypt.h"
+
 
 #define SIZEOF_SOCKADDR(family) ((family) == AF_INET ? sizeof(SOCKADDR_IN) : sizeof(SOCKADDR_IN6))
 
